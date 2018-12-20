@@ -65,7 +65,7 @@ public class AioChannel implements Channel {
 					this.channel.read(message).get(this.timeout, TimeUnit.MILLISECONDS);
 					
 					message.flip();
-	                return this.serializer.encoder(message.array(), messageClass);
+	                return this.serializer.encoder(message.array());
 				}else {
 					console.println("关闭连接 .....getLocalAddress=" + this.channel.getLocalAddress() + "/getRemoteAddress=" + this.channel.getRemoteAddress());
 					close();

@@ -17,7 +17,7 @@ import com.echo.flaginfo.minirpc.core.message.Message;
 public class JDKSerializer implements Serializer {
 
 	@Override
-	public <E extends Message> E encoder(byte[] bytes, Class<E> messageClass)
+	public <E extends Message> E encoder(byte[] bytes)
 			throws IOException, ClassNotFoundException {
 		final E message;
 		

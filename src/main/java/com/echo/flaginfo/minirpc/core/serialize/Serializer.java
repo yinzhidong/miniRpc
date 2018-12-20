@@ -9,7 +9,7 @@ public interface Serializer {
 	 /**
      * 反序列化
      */
-    <E extends Message> E encoder(byte[] bytes, Class<E> messageClass) throws IOException, ClassNotFoundException;
+    <E extends Message> E encoder(byte[] bytes) throws IOException, ClassNotFoundException;
 
     /**
      * 序列化
