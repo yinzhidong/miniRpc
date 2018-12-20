@@ -53,23 +53,27 @@ public class AioChannel implements Channel {
 
 		try {
 			if (this.isOpen()) {
+				
 				final ByteBuffer messageLength = ByteBuffer.allocate(4);
+				
 				// 异步阻塞读取
 				Integer integer = this.channel.read(messageLength).get(this.timeout, TimeUnit.MILLISECONDS);
-				if (-1 == integer) {
+				if (-1 != integer) {
+					messageLength.flip();
+					int length = messageLength.getInt();
+					final ByteBuffer message = ByteBuffer.allocate(length);
+					this.channel.read(message).get(this.timeout, TimeUnit.MILLISECONDS);
+					
+					message.flip();
+	                return this.serializer.encoder(message.array(), messageClass);
+				}else {
 					console.println("关闭连接 .....getLocalAddress=" + this.channel.getLocalAddress() + "/getRemoteAddress=" + this.channel.getRemoteAddress());
 					close();
 					return null;
 				}
-				int length = messageLength.getInt();
-				final ByteBuffer message = ByteBuffer.allocate(length);
-				this.channel.read(message).get(this.timeout, TimeUnit.MILLISECONDS);
-				
-				message.flip();
-                return this.serializer.encoder(message.array(), messageClass);
 			}
-
 		} catch (final TimeoutException | ExecutionException e) {
+			e.printStackTrace();
             throw new MiniRpcException(e);
         } catch (final Exception e) {
         	console.println("读取数据异常...e=" + e);

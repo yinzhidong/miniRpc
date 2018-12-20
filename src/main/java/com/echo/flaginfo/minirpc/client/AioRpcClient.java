@@ -2,7 +2,6 @@ package com.echo.flaginfo.minirpc.client;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -12,7 +11,6 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -53,14 +51,14 @@ public class AioRpcClient implements Client {
 
 		this.socketAddress = socketAddress;
 		try {
-			asynchronousSocketChannel.connect(socketAddress).get(this.timeout, TimeUnit.MILLISECONDS);
+			asynchronousSocketChannel.connect(this.socketAddress).get(this.timeout, TimeUnit.MILLISECONDS);
 		} catch (final InterruptedException | TimeoutException e) {
 			e.printStackTrace();
 		} catch (final ExecutionException e) {
 			e.printStackTrace();
 			console.println("连接失败....e=" + e.getMessage());
 		}
-
+		
 		this.channel = new AioChannel(asynchronousSocketChannel, this.serializer, this.timeout);
 	}
 
@@ -102,7 +100,7 @@ public class AioRpcClient implements Client {
 	@Override
 	public <S> S getService(String name, Class<S> clazz) {
 		
-		return (S)Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), new InvocationHandler() {
+		return (S)Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
 			
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -148,7 +146,7 @@ public class AioRpcClient implements Client {
 		AIOThreadFactory() {
 			SecurityManager s = System.getSecurityManager();
 			group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-			namePrefix = "Aio-threadFactory-" + poolNumber.getAndIncrement() + "-thread-";
+			namePrefix = "Aio-ThreadFactory-" + poolNumber.getAndIncrement() + "-thread-";
 		}
 
 		public Thread newThread(Runnable r) {
